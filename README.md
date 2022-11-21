@@ -8,4 +8,4 @@
 
 Open the index.html
 
-In the data foler, The bitcoin price and bitcoin news could be found.
+In the data foler, The bitcoin price, bitcoin news, jupyter file and RStudio file could be found.
