@@ -1,0 +1,61 @@
+<html>
+<head>
+  <title>Bitcoin Price Modelling via Text Analysis</title>
+  <link rel="shortcut icon" href="bitcoin_favicon.ico">
+  <link rel="stylesheet" href="css/project.css" type="text/css" charset="utf-8">
+  <link rel="stylesheet" href="css/navigation.css" type="text/css" charset="utf-8">
+</head>
+<body>
+
+
+
+<!--     <script src="js/navigation.js"></script>  -->
+
+<div id="head">
+
+  <div id="logo">
+    <a href="index.html">
+    <img id="logo_img" src="images/bitcoin.png" alt="bitcoin_logo">
+  </a>
+  </div>
+
+  <div id="title">
+  <h2> Bitcoin Price Modelling via Text Analysis </h2>
+  </div>
+
+
+</div>
+
+<ul id="list-nav">
+  <li><a href="index.html">Home</a></li>
+  <li><a href="plan.html">Project Plan</a></li>
+  <li><a href="web.html" target="_blank">Web Scraping</a></li>
+  <li><a href="model.html" target="_blank">Statistical Model</a></li>
+  <li><a href="data.html">Data</a></li>
+  <li><a href="contact.html">Contact</a></li>
+</ul>
+
+  <div id="content">
+
+  <img id="plan" src="images/project_plan.png" alt="project_plan">
+<p>
+  The project focuses on applying text analysis on predicting the price movement of bitcoin. The project comprises multiple steps, including data collection and analysis, statistical model, and website development. The project duration will be from September 2022 to December 2022. I will use Python to extract the data from Google news, including headings, passage and publication date, and download the historical bitcoin price from January 2017 to August 2022 on Yahoo Finance. For the language of the news, English news will only be used for the convenience to analyse the text. For the data cleaning part, incorrectly formatted, duplicate, and incomplete data would be removed within a dataset, especially combining numerous data sources. On top of that, some news websites may well block the program from continuously scrapping the text data. This missing data should also be handled by dropping the observations or inputting the missing values according to other observations. The sentiment score will be obtained using Python natural language processing (NLP) libraries and own analysis. For example, if the text has the words like “bullish”, “optimistic” and “gain”, it will have a positive sentiment score. If the text has the words like “bearish” and “loss”, it will have a negative sentiment score. The data will then be visualised to gain insight into the vast amounts of data as well as recognizing new patterns and errors in the dataset. 
+</p>
+<br>
+
+<p>
+  For statistical analysis on the data, I will apply time series theory to create a regression model on the bitcoin price and sentiment score by R. When building the statistical models, the features of the time series data will consist of the sentiment score and subjectivity generated from the text analysis and historical bitcoin prices. By using the statistical findings, price predictions will be made according to the analysis on previous news. The bitcoin price will be predicted using the statistical model. Different metrics, including root mean squared error (RMSE), mean absolute percentage error (MAPE) and relative absolute error (RAE), are adopted to calculate the estimation error of the statistical model. Baseline Model is also used to compare with the original model. The original model will be compared to the baseline model which serves as benchmarks, enabling a more informative evaluation of a trained model. 
+</p>
+<br>
+<p>
+  In order to display the analysis result, a website will be developed using HTML, CSS, and JavaScript. The website will show the historical price, graphs and regression model so the users can easily access the information. Users are able to select different parameters on the website. The parameters can be daily, weekly, or monthly bitcoin prices. Another parameter will be the closing price or opening price of bitcoin. Different parameters will generate different graphs and regression models.
+  
+
+
+</p>
+
+ </div>
+
+
+</body>
+</html>
