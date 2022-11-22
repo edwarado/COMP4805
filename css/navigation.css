@@ -42,8 +42,8 @@ ul#list-nav {
 }
 
 ul#list-nav li {
-	padding-left: 15px;
-	padding-right: 15px;
+	padding-left: 5px;
+	padding-right: 5px;
 	border-right: 1px solid black;
 	display: inline;
 	position: relative;
