@@ -1,0 +1,300 @@
+---
+title: "Bitcoin Price Modelling via Text Analysis"
+author: "Lo Kai Yeung 3035708962"
+subtitle: "COMP 4805 Project"
+date: "September 2022 to December 2022"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    self_contained: yes
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
+---
+
+# Summary
+A regression model was buuilt on the bitcoin price and sentiment score by R. When building the statistical models, the features of the time series data will consist of the sentiment score generated from the text analysis and historical bitcoin prices. By using the statistical findings, price predictions will be made according to the analysis on previous news. The bitcoin price will be predicted using the statistical model. Different metrics, including root mean squared error (RMSE), mean absolute percentage error (MAPE) and relative absolute error (RAE), are adopted to calculate the estimation error of the statistical model. Baseline Model is also used to compare with the statistical model. The statistical model will be compared to the baseline model which serves as benchmarks, enabling a more informative evaluation of a trained model. 
+
+
+\
+
+
+# Description of the Data
+Date: 1 January, 2022 to 31 August, 2022
+\
+Time: Weekly Bitcoin Pirce
+\
+Type of Return: Closing Return of Bitcoin
+\
+Training Dataset: 1/1/2022 to 5/6/2022
+\
+Test Dataset: 5/6/2022 to 31/8/2022 
+\
+NLP Model: vaderSentiment
+\
+
+
+
+
+# Procedures
+\
+Install all the required libraires inclduing Metrics, MLmetrics, knitr, kableExtra, tidyverse, dplyr
+```{r}
+## Install the Libraries
+
+#install.packages("Metrics")
+#install.packages("MLmetrics")
+#install.packages("knitr")
+#install.packages("kableExtra")
+
+#install.packages("tidyverse")
+#install.packages("dplyr")
+
+```
+\
+Import all the installed Libraries
+```{r, results = 'hide', warning = FALSE, message = FALSE}
+## Use the Libraries
+
+library(Metrics)
+library(MLmetrics)
+library(knitr)
+library(kableExtra)
+
+library(tidyverse)
+library(dplyr)
+```
+
+\
+There are 2 files, training and test dataest included. The training dataset is from 1/1/2022 to 5/6/2022 and the test dataset is from 5/6/2022 to 31/8/2022. The training and test dataset occupies around 70% and 30% of all data respectively.
+
+```{r}
+## Read the Data
+
+data = read.csv(file = 'data/bitcoin_price_weekly_2022.csv')
+data_train = read.csv(file = 'data/bitcoin_price_weekly_2022_train.csv')
+data_test = read.csv(file = 'data/bitcoin_price_weekly_2022_test.csv')
+
+```
+
+\
+The Regression Model is then built by regressing the weekly closing return of bitcoin on the sentiment score on the training dataset. \
+
+close_return: weekly closing return of bitcoin\
+sentiment: sentiment score in the current week\
+sentiment_1: sentiment score in the previous week\
+\
+
+predicted return = -0.01987 + 1.36916(sentiment) - 1.17128(sentiment_1)
+
+```{r}
+## Build the Regression Model
+
+regression_model = lm(close_return ~ sentiment + sentiment_1, data = data_train)
+regression_model
+
+```
+
+\
+The summary function shows the details of the regression model. sentiment has a p-value of 0.00532 and sentiment_1 has a p-value of 0.01583. sentiment is statistically significant predictors at α = 0.05. It also shows that the multiple R-squared is 0.4038 and the adjusted R-squared is 0.341. 
+
+```{r}
+## Summary of the Regression Model
+
+lin = summary(regression_model)
+summary(regression_model)
+
+```
+
+
+\
+It calculates the predicted return using the regression model
+```{r}
+# Calculate the Predicted Return
+
+predicted_return = lin$coefficients[1, 1] + lin$coefficients[2, 1]*data_test$sentiment + lin$coefficients[3, 1]*data_test$sentiment_1
+
+predicted_return_train = lin$coefficients[1, 1] + lin$coefficients[2, 1]*data_train$sentiment + lin$coefficients[3, 1]*data_train$sentiment_1
+
+```
+
+\
+The following table shows the predicted return and actual return on the training dataset. The accuray rate of the sign of the predicted return is 81.82%.
+
+```{r}
+# Predicted Return vs Actual Return on Training Data using VaderSentiment
+
+signs = c()
+signs_word = c()
+
+for (i in 1:length(predicted_return_train))
+  if (sign(predicted_return_train[i]) == sign(data_train$close_return[i])){
+  signs[i] = 1
+  signs_word[i] = "same"
+  } else{
+  signs[i] = 0
+  signs_word[i] = "different"
+  }
+
+
+table_1 = data.frame(data_train$Date, predicted_return_train, data_train$close_return, signs_word)
+
+table_1 %>%
+  knitr::kable(caption = "Table 1: Predicted Return vs Actual Return on Training Data using VaderSentiment", align = "lrrr", digits = 3, col.name = c("Date", "Predicted Return", "Actual Return", "Sign")) %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+
+accuray = sum(signs)/length(signs)
+
+print(paste("The Accuray Rate of the Sign is", accuray))
+```
+
+
+
+
+
+```{r}
+## Summary of the Regression Model
+
+lin = summary(regression_model)
+summary(regression_model)
+
+```
+
+
+\
+It calculates the predicted return using the regression model
+```{r}
+# Calculate the Predicted Return
+
+predicted_return = lin$coefficients[1, 1] + lin$coefficients[2, 1]*data_test$sentiment + lin$coefficients[3, 1]*data_test$sentiment_1
+
+predicted_return_train = lin$coefficients[1, 1] + lin$coefficients[2, 1]*data_train$sentiment + lin$coefficients[3, 1]*data_train$sentiment_1
+
+```
+
+\
+
+
+```{r}
+graph_1 = data.frame(x1 = data_train$Date, y1 = predicted_return_train, y2 = data_train$close_return)
+
+
+ggplot(graph_1, aes(x = x1)) + geom_line(aes(y = y1, group = 1), color = "blue") + geom_line(aes(y = y2, group = 1), color = "red") + xlab('Date') + ylab('Return') + labs(title="Predicted Return vs Actual Return on Training Data") + theme(axis.text.x = element_text(color = "black", size = 8, angle = 45)) + scale_x_discrete(limits = data_train$Date) + labs(caption = "Blue: Predicted Return; Red: Actual Return")
+
+```
+
+
+
+\
+The following table shows the predicted return and actual return on the test dataset. The accuray rate of the sign of the predicted return is 83.33%.
+
+```{r}
+# Predicted Return vs Actual Return on Test Data
+
+signs = c()
+signs_word = c()
+
+for (i in 1:length(predicted_return))
+  if (sign(predicted_return[i]) == sign(data_test$close_return[i])){
+  signs[i] = 1
+  signs_word[i] = "same"
+  } else{
+  signs[i] = 0
+  signs_word[i] = "different"
+  }
+
+
+table_2 = data.frame(data_test$Date, predicted_return, data_test$close_return, signs_word)
+
+table_2 %>%
+  knitr::kable(caption = "Table 2: Predicted Return vs Actual Return on Test Data", align = "lrrr", digits = 3, col.name = c("Date", "Predicted Return", "Actual Return", "Sign")) %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+
+accuray = sum(signs)/length(signs)
+
+print(paste("The Accuray Rate of the Sign is", accuray))
+
+graph_2 = data.frame(x1 = data_test$Date, y1 = predicted_return, y2 = data_test$close_return)
+
+ggplot(graph_2, aes(x = x1)) + geom_line(aes(y = y1, group = 1), color = "blue") + geom_line(aes(y = y2, group = 1), color = "red") + xlab('Date') + ylab('Return') + labs(title="Predicted Return vs Actual Return on Test Data") + theme(axis.text.x = element_text(color = "black", size = 8, angle = 45)) + scale_x_discrete(limits = data_test$Date) + labs(caption = "Blue: Predicted Return; Red: Actual Return")
+
+```
+
+\
+The baseline model calculaes the mean of the weekly closing return in the training dataset. The following table shows the metrics compared the regression model and the baseline model. 5 metrics are chosen to make the comparision. The results indicate that the regression has lower error than the baseline model.
+
+```{r}
+
+
+average_close_return = c()
+
+for (i in 1:length(predicted_return))
+  average_close_return[i] = mean(data_train$close_return)
+
+
+
+#Mean Absolute Error (MAE)
+a = mae(data_test$close_return, predicted_return)
+a_2 = mae(data_test$close_return, average_close_return)
+
+
+#Mean Squared Error (MSE)
+b = mse(data_test$close_return, predicted_return)
+b_2 = mse(data_test$close_return, average_close_return)
+
+
+# Root Mean Squared Error (RMSE)
+c = rmse(data_test$close_return, predicted_return)
+c_2 = rmse(data_test$close_return, average_close_return)
+
+
+
+#Mean absolute percentage error (MAPE)
+e = MAPE(predicted_return, data_test$close_return)
+e_2 = MAPE(average_close_return, data_test$close_return)
+
+
+#Relative absolute error (RAE)
+f = rae(actual = data_test$close_return, predicted = predicted_return)
+f_2 = rae(actual = data_test$close_return, predicted = average_close_return)
+
+metric = c("Mean Absolute Error (MAE)", "Mean Squared Error (MSE)", "Root Mean Squared Error (RMSE)", "Mean absolute percentage error (MAPE)", "Relative absolute error (RAE)")
+Model = c(a, b, c, e, f)
+baseline_model = c(a_2, b_2, c_2, e_2, f_2)
+high_low = c()
+diff = c()
+
+for (i in 1:length(Model))
+  if (Model[i] > baseline_model[i]){
+  high_low[i] = "Worse"
+  diff[i] = Model[i] - baseline_model[i]
+  } else{
+  high_low[i] = "Better"
+  diff[i] = Model[i] - baseline_model[i]
+  }
+
+table_3 = data.frame(metric, Model, baseline_model, high_low, diff)
+
+table_3 %>%
+  knitr::kable(caption = "Table 3: Regression Model vs Baseline Model", align = "lrrrr",  digits = 4, col.name = c("Metric","Regression Model", "Baseline Model", "Better or Worse", "Difference")) %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+average_close_return
+```
+
+
+
+
+
+#  References
+Hu, Z., Liu, W., Bian, J., Liu, X., &amp; Liu, T.-Y. (2019, February 20). Listening to chaotic whispers: A deep learning framework for news-oriented stock trend prediction. arXiv.org. Retrieved November 21, 2022, from https://arxiv.org/abs/1712.02136
+
+Kasper Welbers, Wouter Van Atteveldt & Kenneth Benoit (2017) Text Analysis in R, Communication Methods and Measures, 11:4, 245-265, DOI: 10.1080/19312458.2017.1387238
+
+Person, J., P., &amp; Stone. (2020, July 24). Thematic text analysis: New agendas for analyzing text content: 3 : T. Taylor &amp; Francis. Retrieved November 21, 2022, from https://www.taylorfrancis.com/chapters/edit/10.4324/9781003064060-3/thematic-text-analysis-new-agendas-analyzing-text-content-philip-stone
+
